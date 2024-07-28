@@ -3,13 +3,19 @@ session_start();
 require 'db.php';
 require 'helpers.php';
 
-if (!isLoggedIn()) {
-    redirect('index.html');
+// Check if the user is logged in
+if (!isset($_SESSION['teacher_id'])) {
+    header('Location: index.php');
+    exit;
 }
 
+// Fetch students
 $stmt = $pdo->prepare('SELECT * FROM students WHERE teacher_id = ?');
 $stmt->execute([$_SESSION['teacher_id']]);
 $students = $stmt->fetchAll();
+
+// Fetch subjects from environment variable
+$subjects = explode(',', getenv('SUBJECTS'));
 ?>
 
 <!DOCTYPE html>
@@ -23,8 +29,8 @@ $students = $stmt->fetchAll();
 <body>
     <div class="container">
         <h2>Welcome, Teacher</h2>
-        <a href="logout.php" class="logout-button">Logout</a>
         <button onclick="showAddStudentModal()">Add Student</button>
+        <button class="logout-button" onclick="logout()">Logout</button>
 
         <table border="1">
             <thead>
@@ -63,7 +69,12 @@ $students = $stmt->fetchAll();
                 </div>
                 <div class="form-group">
                     <label for="newSubject">Subject:</label>
-                    <input type="text" id="newSubject" required>
+                    <select id="newSubject" required>
+                        <option value="">Select Subject</option>
+                        <?php foreach ($subjects as $subject): ?>
+                            <option value="<?= htmlspecialchars($subject) ?>"><?= htmlspecialchars($subject) ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="newMarks">Marks:</label>
@@ -87,7 +98,12 @@ $students = $stmt->fetchAll();
                 </div>
                 <div class="form-group">
                     <label for="editSubject">Subject:</label>
-                    <input type="text" id="editSubject" required>
+                    <select id="editSubject" required>
+                        <option value="">Select Subject</option>
+                        <?php foreach ($subjects as $subject): ?>
+                            <option value="<?= htmlspecialchars($subject) ?>"><?= htmlspecialchars($subject) ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="editMarks">Marks:</label>

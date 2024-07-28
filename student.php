@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $marks = $_POST['marks'];
 
         if (empty($name) || empty($subject) || empty($marks)) {
-            echo 'Error: Missing required fields';
+            echo json_encode(['status' => 'error', 'message' => 'Missing required fields']);
             exit;
         }
 
@@ -21,22 +21,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $student = $stmt->fetch();
 
             if ($student) {
-                $stmt = $pdo->prepare('UPDATE students SET marks = marks + ? WHERE id = ?');
-                if ($stmt->execute([$marks, $student['id']])) {
-                    echo 'Success';
-                } else {
-                    echo 'Error: Could not update student marks';
-                }
+                echo json_encode(['status' => 'error', 'message' => 'Student already exists']);
             } else {
                 $stmt = $pdo->prepare('INSERT INTO students (name, subject, marks, teacher_id) VALUES (?, ?, ?, ?)');
                 if ($stmt->execute([$name, $subject, $marks, $_SESSION['teacher_id']])) {
-                    echo 'Success';
+                    echo json_encode(['status' => 'success']);
                 } else {
-                    echo 'Error: Could not add student';
+                    echo json_encode(['status' => 'error', 'message' => 'Could not add student']);
                 }
             }
         } catch (PDOException $e) {
-            echo 'Error: ' . $e->getMessage();
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     } elseif ($action == 'update') {
         $id = $_POST['id'];
@@ -45,19 +40,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $marks = $_POST['marks'];
 
         if (empty($id) || empty($name) || empty($subject) || empty($marks)) {
-            echo 'Error: Missing required fields';
+            echo json_encode(['status' => 'error', 'message' => 'Missing required fields']);
             exit;
         }
 
         try {
             $stmt = $pdo->prepare('UPDATE students SET name = ?, subject = ?, marks = ? WHERE id = ?');
             if ($stmt->execute([$name, $subject, $marks, $id])) {
-                echo 'Success';
+                echo json_encode(['status' => 'success']);
             } else {
-                echo 'Error: Could not update student';
+                echo json_encode(['status' => 'error', 'message' => 'Could not update student']);
             }
         } catch (PDOException $e) {
-            echo 'Error: ' . $e->getMessage();
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     } elseif ($action == 'delete') {
         $id = $_POST['id'];
@@ -65,12 +60,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         try {
             $stmt = $pdo->prepare('DELETE FROM students WHERE id = ?');
             if ($stmt->execute([$id])) {
-                echo 'Success';
+                echo json_encode(['status' => 'success']);
             } else {
-                echo 'Error: Could not delete student';
+                echo json_encode(['status' => 'error', 'message' => 'Could not delete student']);
             }
         } catch (PDOException $e) {
-            echo 'Error: ' . $e->getMessage();
+            echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         }
     }
 }

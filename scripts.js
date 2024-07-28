@@ -1,7 +1,3 @@
-document.addEventListener('DOMContentLoaded', function () {
-    // No specific initialization required for this example
-});
-
 function showAddStudentModal() {
     document.getElementById('addStudentModal').style.display = 'block';
 }
@@ -26,10 +22,12 @@ function addStudent() {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status === 200) {
-                if (xhr.responseText === 'Success') {
+                var response = JSON.parse(xhr.responseText);
+                if (response.status === 'success') {
+                    alert('Student added successfully');
                     location.reload();
                 } else {
-                    alert('Error: ' + xhr.responseText);
+                    alert('Error: ' + response.message);
                 }
             } else {
                 alert('HTTP Error: ' + xhr.status);
@@ -38,6 +36,7 @@ function addStudent() {
     };
     xhr.send(`action=add&name=${encodeURIComponent(name)}&subject=${encodeURIComponent(subject)}&marks=${encodeURIComponent(marks)}`);
 }
+
 
 function showEditStudentModal(id, name, subject, marks) {
     document.getElementById('editStudentId').value = id;
@@ -69,10 +68,11 @@ function updateStudent() {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status === 200) {
-                if (xhr.responseText === 'Success') {
+                var response = JSON.parse(xhr.responseText);
+                if (response.status === 'success') {
                     location.reload();
                 } else {
-                    alert('Error: ' + xhr.responseText);
+                    alert('Error: ' + response.message);
                 }
             } else {
                 alert('HTTP Error: ' + xhr.status);
@@ -81,6 +81,7 @@ function updateStudent() {
     };
     xhr.send(`action=update&id=${id}&name=${encodeURIComponent(name)}&subject=${encodeURIComponent(subject)}&marks=${encodeURIComponent(marks)}`);
 }
+
 
 function deleteStudent(id) {
     if (!confirm('Are you sure you want to delete this student?')) {
@@ -93,10 +94,11 @@ function deleteStudent(id) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status === 200) {
-                if (xhr.responseText === 'Success') {
+                var response = JSON.parse(xhr.responseText);
+                if (response.status === 'success') {
                     location.reload();
                 } else {
-                    alert('Error: ' + xhr.responseText);
+                    alert('Error: ' + response.message);
                 }
             } else {
                 alert('HTTP Error: ' + xhr.status);
@@ -104,4 +106,20 @@ function deleteStudent(id) {
         }
     };
     xhr.send(`action=delete&id=${id}`);
+}
+
+function logout() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'logout.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                window.location.href = 'index.php';
+            } else {
+                alert('Logout failed: ' + xhr.status);
+            }
+        }
+    };
+    xhr.send();
 }
