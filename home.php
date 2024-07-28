@@ -1,14 +1,12 @@
 <?php
 session_start();
 require 'db.php';
+require 'helpers.php';
 
-// Check if the user is logged in
-if (!isset($_SESSION['teacher_id'])) {
-    header('Location: index.html');
-    exit;
+if (!isLoggedIn()) {
+    redirect('index.html');
 }
 
-// Fetch students
 $stmt = $pdo->prepare('SELECT * FROM students WHERE teacher_id = ?');
 $stmt->execute([$_SESSION['teacher_id']]);
 $students = $stmt->fetchAll();
